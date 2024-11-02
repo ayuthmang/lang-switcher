@@ -1,5 +1,7 @@
+import debounce from "lodash/debounce";
 import type { MetaFunction } from "@remix-run/node";
 import { useCallback, useState } from "react";
+import { EN_TH } from "~/constants/key-mapping";
 
 export const meta: MetaFunction = () => {
   return [
@@ -8,116 +10,37 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-const KEY_MAPPING_ENG_TH = {
-  "1": "ๅ",
-  "!": "+",
-  "@": "1",
-  "2": "/",
-  "3": "-",
-  "#": "2",
-  "4": "ภ",
-  $: "3",
-  "5": "ถ",
-  "%": "4",
-  "6": "ุ",
-  "^": "ู",
-  "7": "ึ",
-  "&": "฿",
-  "8": "ค",
-  "*": "5",
-  "9": "ต",
-  "(": "6",
-  "0": "จ",
-  ")": "7",
-  "-": "ข",
-  _: "8",
-  "=": "ช",
-  "+": "9",
-  q: "ๆ",
-  Q: "0",
-  w: "ไ",
-  W: '"',
-  e: "ำ",
-  E: "ฎ",
-  r: "พ",
-  R: "ฑ",
-  t: "ะ",
-  T: "ธ",
-  y: "ั",
-  Y: "ํ",
-  u: "ี",
-  U: "๊",
-  i: "ร",
-  I: "ณ",
-  o: "น",
-  O: "ฯ",
-  p: "ย",
-  P: "ญ",
-  "[": "บ",
-  "{": "ฐ",
-  "]": "ล",
-  "`": "-",
-  "\\": "ฃ",
-  "|": "ฅ",
-  a: "ฟ",
-  A: "ฤ",
-  s: "ห",
-  S: "ฆ",
-  d: "ก",
-  D: "ฏ",
-  f: "ด",
-  F: "โ",
-  g: "เ",
-  G: "ฌ",
-  h: "้",
-  H: "็",
-  j: "่",
-  J: "๋",
-  k: "า",
-  K: "ษ",
-  l: "ส",
-  L: "ศ",
-  ";": "ว",
-  ":": "ซ",
-  "'": "ง",
-  '"': ".",
-  z: "ผ",
-  Z: "(",
-  x: "ป",
-  X: ")",
-  c: "แ",
-  C: "ฉ",
-  v: "อ",
-  V: "ฮ",
-  b: "ิ",
-  B: "ฺ",
-  n: "ท",
-  N: "์",
-  m: "ท",
-  M: "?",
-  ",": "ม",
-  "<": "ฒ",
-  ".": "ใ",
-  ">": "ฬ",
-  "/": "ฝ",
-  "?": "ฦ",
-} as const;
-
-function toTargetLang(mapper: Record<string, string>) {
+function buildKeyMapper(mapping: Record<string, string>) {
   return (text: string) => {
     return text
       .split("")
-      .map((char) => {
-        return mapper[char] || char;
-      })
+      .map((char) => mapping[char] || char)
       .join("");
   };
 }
 
-const toThai = toTargetLang(KEY_MAPPING_ENG_TH);
+const toThai = buildKeyMapper(EN_TH);
+
+const editorInitialState = {
+  from: "l;ylfu",
+  to: toThai("l;ylfu"),
+};
 
 export default function Index() {
-  const [editorState, setEditorState] = useState({ from: "l;ylfu", to: "" });
+  const [editorState, setEditorState] = useState(() => {
+    return editorInitialState;
+  });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleTransformToTargetLang = useCallback(
+    debounce(() => {
+      setEditorState((prevState) => ({
+        ...prevState,
+        to: toThai(prevState.from),
+      }));
+    }, 300),
+    []
+  );
 
   const handleEditorChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -125,7 +48,7 @@ export default function Index() {
       const nextState = { [name]: value };
 
       if (name === "from") {
-        nextState.to = toThai(value);
+        handleTransformToTargetLang();
       }
 
       setEditorState((prevState) => ({
@@ -133,25 +56,23 @@ export default function Index() {
         ...nextState,
       }));
     },
-    []
+    [handleTransformToTargetLang]
   );
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="grid grid-cols-2 gap-4">
-        <textarea
-          className="w-full"
+    <div className="h-screen flex justify-center">
+      <div className="grid grid-cols-2 gap-4 w-full">
+        <TextArea
           name="from"
           value={editorState.from}
           onChange={handleEditorChange}
-        ></textarea>
-        <textarea
-          className="w-full"
-          name="to"
-          value={editorState.to}
-          onChange={handleEditorChange}
-        ></textarea>
+        />
+        <TextArea name="to" value={editorState.to} />
       </div>
     </div>
   );
+}
+
+function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea className="w-full h-full" {...props} />;
 }
