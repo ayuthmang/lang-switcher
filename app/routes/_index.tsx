@@ -2,11 +2,17 @@ import debounce from "lodash/debounce";
 import type { MetaFunction } from "@remix-run/node";
 import { useCallback, useState } from "react";
 import { EN_TH } from "~/constants/key-mapping";
+import Footer from "~/components/footer";
+import Header from "~/components/header";
+import { cn } from "~/utils/misc";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Pasathai" },
+    {
+      name: "เข้ามาเปลี่ยนภาษาด้วยเว็บนี้ได้เลย",
+      content: "เปลี่ยนข้อความภาษาอังกฤษเป็นไทยง่ายแสนง่าย",
+    },
   ];
 };
 
@@ -21,14 +27,14 @@ function buildKeyMapper(mapping: Record<string, string>) {
 
 const toThai = buildKeyMapper(EN_TH);
 
-const editorInitialState = {
-  from: "l;ylfu",
-  to: toThai("l;ylfu"),
-};
+function getEditorInitialState() {
+  return { from: "l;ylfu", to: toThai("l;ylfu") };
+}
 
 export default function Index() {
-  const [editorState, setEditorState] = useState(() => {
-    return editorInitialState;
+  const [editorState, setEditorState] = useState({
+    from: "",
+    to: "",
   });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,7 +45,7 @@ export default function Index() {
         to: toThai(prevState.from),
       }));
     }, 300),
-    []
+    [],
   );
 
   const handleEditorChange = useCallback(
@@ -56,23 +62,48 @@ export default function Index() {
         ...nextState,
       }));
     },
-    [handleTransformToTargetLang]
+    [handleTransformToTargetLang],
   );
 
   return (
-    <div className="h-screen flex justify-center">
-      <div className="grid grid-cols-2 gap-4 w-full">
-        <TextArea
-          name="from"
-          value={editorState.from}
-          onChange={handleEditorChange}
-        />
-        <TextArea name="to" value={editorState.to} />
-      </div>
+    <div className={"flex h-full flex-col"}>
+      <Header />
+      <main className="flex flex-1 flex-grow-[3]">
+        <div className="mx-auto flex max-w-7xl flex-1 gap-8 p-8">
+          <FormGroup>
+            <label htmlFor="from">From</label>
+            <TextArea
+              id="from"
+              name="from"
+              value={editorState.from}
+              onChange={handleEditorChange}
+            />
+          </FormGroup>
+          <FormGroup>
+            <label htmlFor="to">To</label>
+            <TextArea id="to" name="to" value={editorState.to} readOnly />
+          </FormGroup>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+function FormGroup({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex flex-1 flex-col gap-2", className)}>
+      {children}
     </div>
   );
 }
 
 function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className="w-full h-full" {...props} />;
+  return <textarea className="h-full w-full flex-1 p-4" {...props} />;
 }
