@@ -2,9 +2,8 @@ import debounce from "lodash/debounce";
 import type { MetaFunction } from "@remix-run/node";
 import { useCallback, useState } from "react";
 import { EN_TH } from "~/constants/key-mapping";
-import Footer from "~/components/footer";
-import Header from "~/components/header";
 import { cn } from "~/utils/misc";
+import { Textarea } from "~/components/ui/textarea";
 
 export const meta: MetaFunction = () => {
   return [
@@ -32,10 +31,7 @@ function getEditorInitialState() {
 }
 
 export default function Index() {
-  const [editorState, setEditorState] = useState({
-    from: "",
-    to: "",
-  });
+  const [editorState, setEditorState] = useState(() => getEditorInitialState());
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleTransformToTargetLang = useCallback(
@@ -66,27 +62,30 @@ export default function Index() {
   );
 
   return (
-    <div className={"flex h-full flex-col"}>
-      <Header />
-      <main className="flex flex-1 flex-grow-[3]">
-        <div className="mx-auto flex max-w-7xl flex-1 gap-8 p-8">
-          <FormGroup>
-            <label htmlFor="from">From</label>
-            <TextArea
-              id="from"
-              name="from"
-              value={editorState.from}
-              onChange={handleEditorChange}
-            />
-          </FormGroup>
-          <FormGroup>
-            <label htmlFor="to">To</label>
-            <TextArea id="to" name="to" value={editorState.to} readOnly />
-          </FormGroup>
-        </div>
-      </main>
-      <Footer />
-    </div>
+    <main className="flex flex-1 flex-grow-[3]">
+      <div className="mx-auto flex max-w-7xl flex-1 flex-col gap-4 p-8 sm:flex-row sm:gap-8">
+        <FormGroup>
+          <label htmlFor="from">From</label>
+          <Textarea
+            className="h-full w-full flex-1"
+            id="from"
+            name="from"
+            value={editorState.from}
+            onChange={handleEditorChange}
+          />
+        </FormGroup>
+        <FormGroup>
+          <label htmlFor="to">To</label>
+          <Textarea
+            className="h-full w-full flex-1"
+            id="to"
+            name="to"
+            value={editorState.to}
+            readOnly
+          />
+        </FormGroup>
+      </div>
+    </main>
   );
 }
 
@@ -102,8 +101,4 @@ function FormGroup({
       {children}
     </div>
   );
-}
-
-function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className="h-full w-full flex-1 p-4" {...props} />;
 }
