@@ -26,7 +26,8 @@ function Navbar({ className }: { className?: string }) {
               {item.name}
             </Link>
           ))}
-
+        </div>
+        <div>
           <ModeToggle />
         </div>
       </nav>
@@ -37,8 +38,10 @@ function Navbar({ className }: { className?: string }) {
 function Logo({ className }: { className?: string }) {
   return (
     <Link to="/" className={cn("flex items-center gap-x-2", className)}>
-      <SwitchIcon className="text-primary h-6 w-6" />
-      <span className="text-base font-semibold text-primary">Lang Switcher</span>
+      <SwitchIcon className="h-6 w-6 text-primary" />
+      <span className="text-base font-semibold text-primary">
+        Lang Switcher
+      </span>
     </Link>
   );
 }
