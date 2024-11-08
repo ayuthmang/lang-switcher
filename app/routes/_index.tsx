@@ -31,12 +31,13 @@ function useEditorState() {
   const [toText, setToText] = useState("");
   const deferredToText = useDeferredValue(toText);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedToThai = useCallback(
     debounce((text: string) => {
       const toText = toThai(text);
       setToText(toText);
     }),
-    [setToText],
+    [],
   );
 
   const handleFromTextChange = useCallback(
