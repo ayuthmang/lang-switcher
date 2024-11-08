@@ -3,6 +3,7 @@ import { useCallback, useDeferredValue, useState } from "react";
 import { EN_TH } from "~/constants/key-mapping";
 import { cn } from "~/utils/misc";
 import { Textarea } from "~/components/ui/textarea";
+import debounce from "lodash/debounce";
 
 export const meta: MetaFunction = () => {
   return [
@@ -30,13 +31,21 @@ function useEditorState() {
   const [toText, setToText] = useState("");
   const deferredToText = useDeferredValue(toText);
 
+  const debouncedToThai = useCallback(
+    debounce((text: string) => {
+      const toText = toThai(text);
+      setToText(toText);
+    }),
+    [setToText],
+  );
+
   const handleFromTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const { value } = e.target;
       setFromText(value);
-      setToText(toThai(value));
+      debouncedToThai(value);
     },
-    [],
+    [debouncedToThai],
   );
 
   return {
