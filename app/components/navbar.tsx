@@ -4,7 +4,7 @@ import { cn } from "~/utils/misc";
 import { ModeToggle } from "./mode-toggle";
 
 const navigation = [
-  { name: "Example", href: "example" },
+  // { name: "Example", href: "example" },
   { name: "GitHub", href: "https://github.com/ayuthmang/lang-switcher" },
 ];
 
