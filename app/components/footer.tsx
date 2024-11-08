@@ -15,7 +15,7 @@ const navigation = [
 function Footer({ className }: { className?: string }) {
   return (
     <footer className={cn(className)}>
-      <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-center lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 py-6 md:flex md:items-center md:justify-center lg:px-8">
         <div className="flex justify-center gap-x-6">
           {navigation.map((item) => (
             <a
