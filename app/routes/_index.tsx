@@ -1,6 +1,5 @@
-import debounce from "lodash/debounce";
 import type { MetaFunction } from "@remix-run/node";
-import { useCallback, useState } from "react";
+import { useCallback, useDeferredValue, useState } from "react";
 import { EN_TH } from "~/constants/key-mapping";
 import { cn } from "~/utils/misc";
 import { Textarea } from "~/components/ui/textarea";
@@ -26,40 +25,30 @@ function buildKeyMapper(mapping: Record<string, string>) {
 
 const toThai = buildKeyMapper(EN_TH);
 
-function getEditorInitialState() {
-  return { from: "l;ylfu", to: toThai("l;ylfu") };
-}
+function useEditorState() {
+  const [fromText, setFromText] = useState("");
+  const [toText, setToText] = useState("");
+  const deferredToText = useDeferredValue(toText);
 
-export default function Index() {
-  const [editorState, setEditorState] = useState(() => getEditorInitialState());
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleTransformToTargetLang = useCallback(
-    debounce(() => {
-      setEditorState((prevState) => ({
-        ...prevState,
-        to: toThai(prevState.from),
-      }));
-    }, 300),
+  const handleFromTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const { value } = e.target;
+      setFromText(value);
+      setToText(toThai(value));
+    },
     [],
   );
 
-  const handleEditorChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const { name, value } = e.target;
-      const nextState = { [name]: value };
+  return {
+    fromText,
+    setFromText,
+    toText: deferredToText,
+    handleFromTextChange,
+  };
+}
 
-      if (name === "from") {
-        handleTransformToTargetLang();
-      }
-
-      setEditorState((prevState) => ({
-        ...prevState,
-        ...nextState,
-      }));
-    },
-    [handleTransformToTargetLang],
-  );
+export default function Index() {
+  const { fromText, toText, handleFromTextChange } = useEditorState();
 
   return (
     <main className="flex flex-1 flex-grow-[3]">
@@ -70,8 +59,9 @@ export default function Index() {
             className="h-full w-full flex-1"
             id="from"
             name="from"
-            value={editorState.from}
-            onChange={handleEditorChange}
+            value={fromText}
+            onChange={handleFromTextChange}
+            placeholder="Type something in English that you typed in Thai&#10;e.g., l;ylfu"
           />
         </FormGroup>
         <FormGroup>
@@ -80,8 +70,9 @@ export default function Index() {
             className="h-full w-full flex-1"
             id="to"
             name="to"
-            value={editorState.to}
+            value={toText}
             readOnly
+            placeholder="See the magic happens here&#10;e.g., สวัสดี"
           />
         </FormGroup>
       </div>
