@@ -2,13 +2,11 @@ import { cn } from "~/utils/misc";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { IconProps } from "@radix-ui/react-icons/dist/types";
 
-type RadixIconProps = IconProps;
-
 const navigation = [
   {
     name: "GitHub",
     href: "https://github.com/ayuthmang/lang-switcher",
-    icon: (props: RadixIconProps) => <GitHubLogoIcon {...props} />,
+    icon: (props: IconProps) => <GitHubLogoIcon {...props} />,
   },
 ];
 
@@ -21,7 +19,7 @@ function Footer({ className }: { className?: string }) {
             <a
               key={item.name}
               href={item.href}
-              className="text-gray-400 hover:text-gray-300"
+              className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-500"
             >
               <span className="sr-only">{item.name}</span>
               <item.icon aria-hidden="true" className="h-8 w-8" />
