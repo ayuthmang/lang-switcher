@@ -1,10 +1,11 @@
 import type { MetaFunction } from "@remix-run/node";
-import { useCallback, useDeferredValue, useState } from "react";
+import { useCallback, useDeferredValue, useRef, useState } from "react";
 import { EN_TH, TH_EN } from "~/constants/key-mapping";
 import { cn } from "~/utils/misc";
 import { Textarea } from "~/components/ui/textarea";
 import debounce from "lodash/debounce";
 import { Button } from "~/components/ui/button";
+import { ArrowRightLeft, ListRestart } from "lucide-react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -73,6 +74,11 @@ function useEditorState() {
     setToText(fromText);
   }
 
+  function clearAllText() {
+    setFromText("");
+    setToText("");
+  }
+
   return {
     fromText,
     setFromText,
@@ -80,18 +86,38 @@ function useEditorState() {
     handleFromTextChange,
     langState: editorState,
     swapLangState,
+    clearAllText,
   };
 }
 
 export default function Index() {
-  const { fromText, toText, handleFromTextChange, langState, swapLangState } =
-    useEditorState();
+  const {
+    fromText,
+    toText,
+    handleFromTextChange,
+    langState,
+    swapLangState,
+    clearAllText,
+  } = useEditorState();
+  const fromTextRef = useRef<HTMLTextAreaElement>(null);
 
   return (
     <main className="flex flex-1 flex-grow-[3]">
       <div className="mx-auto flex max-w-7xl flex-1 flex-col gap-4 p-8 sm:flex-col sm:gap-8">
-        <div className="">
-          <Button onClick={swapLangState}>Swap Lang</Button>
+        <div className="flex flex-row gap-4">
+          <Button onClick={swapLangState}>
+            <ArrowRightLeft className="ml-2 h-4 w-4" />
+            Swap Lang
+          </Button>
+          <Button
+            onClick={() => {
+              clearAllText();
+              fromTextRef.current?.focus();
+            }}
+          >
+            <ListRestart className="ml-2 h-4 w-4" />
+            Clear
+          </Button>
         </div>
 
         <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:gap-8">
@@ -99,6 +125,7 @@ export default function Index() {
             <label htmlFor="from">From ({langState.fromLang})</label>
             <Textarea
               className="h-full w-full flex-1"
+              ref={fromTextRef}
               id="from"
               name="from"
               value={fromText}
