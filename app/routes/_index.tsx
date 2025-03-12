@@ -1,5 +1,11 @@
 import type { MetaFunction } from "@remix-run/node";
-import { useCallback, useDeferredValue, useRef, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { EN_TH, TH_EN } from "~/constants/key-mapping";
 import { cn } from "~/utils/misc";
 import { Textarea } from "~/components/ui/textarea";
@@ -63,22 +69,27 @@ function useEditorState() {
   );
 
   function swapLangState() {
-    setEditorState((prev) => ({
-      fromLang: prev.toLang,
-      toLang: prev.fromLang,
-      transformer:
-        EDITOR_STATE_MAPPER[`${prev.toLang}_${prev.fromLang}`].transformer,
-    }));
-    const prevToText = toText;
-    setFromText(prevToText);
-    setToText(fromText);
+    const nextFromLang = editorState.toLang;
+    const nextToLang = editorState.fromLang;
+    const nextTransformer =
+      EDITOR_STATE_MAPPER[`${nextFromLang}_${nextToLang}`].transformer;
+    setEditorState({
+      fromLang: nextFromLang,
+      toLang: nextToLang,
+      transformer: nextTransformer,
+    });
+    setFromText(toText);
+    setToText(editorState.transformer(fromText));
   }
+
+  useEffect(() => {}, [editorState]);
 
   function clearAllText() {
     setFromText("");
     setToText("");
   }
 
+  console.log({ editorState });
   return {
     fromText,
     setFromText,
