@@ -71,6 +71,12 @@ module.exports = {
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],
+      rules: {
+        // TypeScript already validates props; the rule cannot see types and
+        // reports false positives on every forwardRef component (e.g. the
+        // generated shadcn/ui primitives).
+        "react/prop-types": "off",
+      },
     },
 
     // Node
