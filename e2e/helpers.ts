@@ -9,11 +9,15 @@ export const HELLO_TH = "สวัสดี";
 
 export function converter(page: Page) {
   return {
-    from: page.getByLabel(/^From/),
-    to: page.getByLabel(/^To/),
-    fromLabel: page.getByText(/^From \(/),
-    toLabel: page.getByText(/^To \(/),
-    swap: page.getByRole("button", { name: /swap lang/i }),
+    from: page.getByLabel(/^You typed/),
+    to: page.getByLabel(/^You meant/),
+    // The language pill inside each pane's label.
+    fromLanguage: page.locator('label[for="from"] > span').last(),
+    toLanguage: page.locator('label[for="to"] > span').last(),
+    swap: page.getByRole("button", { name: /swap languages/i }),
     clear: page.getByRole("button", { name: /clear/i }),
+    copy: page.getByRole("button", { name: /cop(y|ied)/i }),
+    hint: page.getByRole("status"),
+    legend: page.getByRole("listitem"),
   };
 }

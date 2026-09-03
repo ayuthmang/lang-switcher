@@ -9,11 +9,17 @@ test.describe("page shell", () => {
   test("renders both editors, starting in en -> th", async ({ page }) => {
     const c = converter(page);
 
-    await expect(c.fromLabel).toHaveText("From (en)");
-    await expect(c.toLabel).toHaveText("To (th)");
+    await expect(c.fromLanguage).toHaveText("English");
+    await expect(c.toLanguage).toHaveText("ไทย");
     await expect(c.from).toHaveValue("");
     await expect(c.to).toHaveValue("");
     await expect(c.to).toHaveAttribute("readonly", "");
+  });
+
+  test("focuses the input on load so you can paste straight away", async ({
+    page,
+  }) => {
+    await expect(converter(page).from).toBeFocused();
   });
 });
 
@@ -90,13 +96,13 @@ test.describe("swap", () => {
 
     await c.swap.click();
 
-    await expect(c.fromLabel).toHaveText("From (th)");
-    await expect(c.toLabel).toHaveText("To (en)");
+    await expect(c.fromLanguage).toHaveText("ไทย");
+    await expect(c.toLanguage).toHaveText("English");
 
     await c.swap.click();
 
-    await expect(c.fromLabel).toHaveText("From (en)");
-    await expect(c.toLabel).toHaveText("To (th)");
+    await expect(c.fromLanguage).toHaveText("English");
+    await expect(c.toLanguage).toHaveText("ไทย");
   });
 
   test("moves the converted text into the input", async ({ page }) => {
@@ -127,7 +133,7 @@ test.describe("swap", () => {
     const c = converter(page);
 
     await c.swap.click();
-    await expect(c.fromLabel).toHaveText("From (th)");
+    await expect(c.fromLanguage).toHaveText("ไทย");
 
     await c.from.fill(HELLO_TH);
 
