@@ -57,21 +57,13 @@ describe("layout inverse", () => {
     expect(broken).toEqual([]);
   });
 
-  // -------------------------------------------------------------------
-  // Known bugs. `it.fails()` means "expected to fail" — the suite stays
-  // green while the bug is open and turns RED once it is fixed, prompting
-  // us to drop the annotation.
-  //
-  // On the Thai Kedmanee layout the "3" key produces "-" and the "`" key
-  // produces "_". EN_TH maps BOTH to "-", so the "`" key is lossy: TH_EN
-  // can only reverse one of the two, and it picks "`".
-  // -------------------------------------------------------------------
-
-  it.fails("EN_TH has no two keys producing the same character", () => {
+  // Regression guard: "`" and "3" both used to produce "-", which made the
+  // "`" key unrecoverable — TH_EN could only reverse one of the two.
+  it("EN_TH has no two keys producing the same character", () => {
     expect(collisions(enTh)).toEqual({});
   });
 
-  it.fails("TH_EN reverses every EN_TH entry", () => {
+  it("TH_EN reverses every EN_TH entry", () => {
     const broken = Object.entries(enTh)
       .filter(([english, thai]) => thEn[thai] !== english)
       .map(

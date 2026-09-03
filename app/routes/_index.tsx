@@ -1,15 +1,14 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "react-router";
 import {
   useCallback,
   useDeferredValue,
-  useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { enToTh, thToEn } from "~/utils/key-mapper";
 import { cn } from "~/utils/misc";
 import { Textarea } from "~/components/ui/textarea";
-import debounce from "lodash/debounce";
 import { Button } from "~/components/ui/button";
 import { ArrowRightLeft, ListRestart } from "lucide-react";
 
@@ -23,70 +22,50 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-type EditorState = {
-  fromLang: "en" | "th";
-  toLang: "en" | "th";
-  transformer: (text: string) => string;
-};
+const DIRECTIONS = {
+  en_th: { fromLang: "en", toLang: "th", transform: enToTh, reversed: "th_en" },
+  th_en: { fromLang: "th", toLang: "en", transform: thToEn, reversed: "en_th" },
+} as const;
 
-const EDITOR_STATE_MAPPER: Record<string, EditorState> = {
-  en_th: { fromLang: "en", toLang: "th", transformer: enToTh },
-  th_en: { fromLang: "th", toLang: "en", transformer: thToEn },
-};
+type Direction = keyof typeof DIRECTIONS;
 
 function useEditorState() {
   const [fromText, setFromText] = useState("");
-  const [toText, setToText] = useState("");
-  const deferredToText = useDeferredValue(toText);
-  const [editorState, setEditorState] = useState<EditorState>(
-    EDITOR_STATE_MAPPER.en_th,
-  );
+  const [direction, setDirection] = useState<Direction>("en_th");
+  const { fromLang, toLang, transform, reversed } = DIRECTIONS[direction];
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedToTargetLang = useCallback(
-    debounce((text: string) => {
-      setToText(editorState.transformer(text));
-    }),
-    [],
+  // The output is derived, never stored, so it cannot drift out of sync with
+  // the input or the active direction. Deferring the input keeps typing
+  // responsive while a large conversion renders.
+  const deferredFromText = useDeferredValue(fromText);
+  const toText = useMemo(
+    () => transform(deferredFromText),
+    [transform, deferredFromText],
   );
 
   const handleFromTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const { value } = e.target;
-      setFromText(value);
-      debouncedToTargetLang(value);
+      setFromText(e.target.value);
     },
-    [debouncedToTargetLang],
+    [],
   );
 
   function swapLangState() {
-    const nextFromLang = editorState.toLang;
-    const nextToLang = editorState.fromLang;
-    const nextTransformer =
-      EDITOR_STATE_MAPPER[`${nextFromLang}_${nextToLang}`].transformer;
-    setEditorState({
-      fromLang: nextFromLang,
-      toLang: nextToLang,
-      transformer: nextTransformer,
-    });
-    setFromText(toText);
-    setToText(editorState.transformer(fromText));
+    // Promote the current output to the input; the new output derives itself.
+    setFromText(transform(fromText));
+    setDirection(reversed);
   }
-
-  useEffect(() => {}, [editorState]);
 
   function clearAllText() {
     setFromText("");
-    setToText("");
   }
 
-  console.log({ editorState });
   return {
     fromText,
-    setFromText,
-    toText: deferredToText,
+    toText,
     handleFromTextChange,
-    langState: editorState,
+    fromLang,
+    toLang,
     swapLangState,
     clearAllText,
   };
@@ -97,7 +76,8 @@ export default function Index() {
     fromText,
     toText,
     handleFromTextChange,
-    langState,
+    fromLang,
+    toLang,
     swapLangState,
     clearAllText,
   } = useEditorState();
@@ -124,7 +104,7 @@ export default function Index() {
 
         <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:gap-8">
           <FormGroup>
-            <label htmlFor="from">From ({langState.fromLang})</label>
+            <label htmlFor="from">From ({fromLang})</label>
             <Textarea
               className="h-full w-full flex-1"
               ref={fromTextRef}
@@ -136,7 +116,7 @@ export default function Index() {
             />
           </FormGroup>
           <FormGroup>
-            <label htmlFor="to">To ({langState.toLang})</label>
+            <label htmlFor="to">To ({toLang})</label>
             <Textarea
               className="h-full w-full flex-1"
               id="to"

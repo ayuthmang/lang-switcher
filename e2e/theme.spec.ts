@@ -12,6 +12,19 @@ function themeMenu(page: Page) {
 }
 
 test.describe("theme toggle", () => {
+  // Regression guard: the trigger used to render its icon at scale(0) in
+  // light mode, leaving the button visually empty.
+  test("shows a visible icon for the active mode", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    const t = themeMenu(page);
+
+    for (const mode of ["System", "Light", "Dark"] as const) {
+      await t.pick(mode);
+      await expect(t.trigger.locator("svg")).toBeVisible();
+    }
+  });
+
   test("applies the dark class when dark is picked", async ({ page }) => {
     await page.goto("/");
     const t = themeMenu(page);
@@ -61,12 +74,7 @@ test.describe("theme toggle", () => {
     await expect(t.html).toHaveClass(/dark/);
   });
 
-  // ---------------------------------------------------------------------
-  // Known bug — see app/components/mode-toggle.tsx: a mount effect calls
-  // handleThemeChange("system") unconditionally, so an explicit choice is
-  // discarded on every page load.
-  // ---------------------------------------------------------------------
-  test.fail("BUG: an explicit theme choice should survive a reload", async ({ page }) => {
+  test("an explicit theme choice survives a reload", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
     const t = themeMenu(page);

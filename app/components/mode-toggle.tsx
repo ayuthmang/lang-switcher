@@ -8,99 +8,40 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { useCallback, useEffect, useState } from "react";
+
+/** `null` means "follow the OS preference". */
+const OPTIONS = [
+  { value: null, label: "System", icon: Monitor },
+  { value: Theme.LIGHT, label: "Light", icon: Sun },
+  { value: Theme.DARK, label: "Dark", icon: Moon },
+] as const;
 
 export function ModeToggle() {
-  const [theme, setTheme] = useTheme();
-  const [useSystemTheme, setUseSystemTheme] = useState(true);
+  const [theme, setTheme, metadata] = useTheme();
 
-  const matchSystemTheme = useCallback(
-    function matchSystemTheme() {
-      const systemPrefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      setTheme(systemPrefersDark ? Theme.DARK : Theme.LIGHT);
-    },
-    [setTheme],
-  );
-
-  function handleThemeChange(
-    theme: (typeof Theme)[keyof typeof Theme] | "system",
-  ) {
-    if (theme === "system") {
-      setUseSystemTheme(true);
-      matchSystemTheme();
-    } else {
-      setUseSystemTheme(false);
-      setTheme(theme);
-    }
-  }
-
-  useEffect(() => {
-    function handleChange() {
-      matchSystemTheme();
-    }
-
-    if (useSystemTheme) {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    }
-  }, [theme, useSystemTheme, matchSystemTheme]);
-
-  useEffect(() => {
-    handleThemeChange("system");
-  }, []);
+  // remix-themes persists the user/system distinction in the theme cookie and
+  // owns the prefers-color-scheme subscription, so there is nothing to mirror
+  // in local state here.
+  const selected = metadata.definedBy === "SYSTEM" ? null : theme;
+  const ActiveIcon =
+    OPTIONS.find((option) => option.value === selected)?.icon ?? Monitor;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
-          {useSystemTheme && (
-            <Monitor className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          )}
-          {theme === Theme.LIGHT && !useSystemTheme && (
-            <Sun className="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          )}
-          {theme === Theme.DARK && !useSystemTheme && (
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          )}
+          <ActiveIcon className="h-[1.2rem] w-[1.2rem]" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => {
-            handleThemeChange("system");
-          }}
-        >
-          <Monitor className="mr-2 h-4 w-4" />
-          System
-          {useSystemTheme && <Check className="ml-2 h-4 w-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => {
-            handleThemeChange(Theme.LIGHT);
-          }}
-        >
-          <Sun className="mr-2 h-4 w-4" />
-          Light
-          {theme === Theme.LIGHT && !useSystemTheme && (
-            <Check className="ml-2 h-4 w-4" />
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => {
-            handleThemeChange(Theme.DARK);
-          }}
-        >
-          <Moon className="mr-2 h-4 w-4" />
-          Dark
-          {theme === Theme.DARK && !useSystemTheme && (
-            <Check className="ml-2 h-4 w-4" />
-          )}
-        </DropdownMenuItem>
+        {OPTIONS.map(({ value, label, icon: Icon }) => (
+          <DropdownMenuItem key={label} onClick={() => setTheme(value)}>
+            <Icon className="mr-2 h-4 w-4" />
+            {label}
+            {selected === value && <Check className="ml-2 h-4 w-4" />}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

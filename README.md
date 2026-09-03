@@ -1,40 +1,65 @@
-# Welcome to Remix!
+# Pasathai — Thai/English keyboard layout switcher
 
-- 📖 [Remix docs](https://remix.run/docs)
+Fixes text typed with the wrong keyboard layout. Type `l;ylfu` — English
+keystrokes for what you meant to type in Thai — and get back `สวัสดี`.
+
+The conversion is a pure character-for-character remap of the Thai Kedmanee
+layout, runs entirely in the browser, and stores nothing.
 
 ## Development
 
-Run the dev server:
-
-```shellscript
-npm run dev
+```sh
+pnpm install
+pnpm dev
 ```
+
+The app runs at http://localhost:5173.
+
+## Testing
+
+```sh
+pnpm test          # unit tests (Vitest) — layout data and conversion logic
+pnpm test:e2e      # end-to-end tests (Playwright) — user-facing flows
+pnpm test:e2e:ui   # end-to-end tests in Playwright's UI mode
+```
+
+`pnpm test:e2e` starts its own dev server. On a fresh checkout, install the
+browser first:
+
+```sh
+pnpm exec playwright install chromium
+```
+
+## Checks
+
+```sh
+pnpm lint
+pnpm typecheck
+```
+
+CI runs lint, typecheck, unit tests, a production build, and the end-to-end
+suite on every push and pull request. See
+[.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 ## Deployment
 
-First, build your app for production:
-
 ```sh
-npm run build
+pnpm build
+pnpm start
 ```
 
-Then run the app in production mode:
+`SESSION_SECRET` must be set in production — it signs the cookie holding the
+visitor's theme preference, and the app refuses to boot without it. Copy
+[.env.example](.env.example) and generate a value with `openssl rand -base64 32`.
 
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-### DIY
-
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
+Deploy the output of `pnpm build`:
 
 - `build/server`
 - `build/client`
 
-## Styling
+## Layout data
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+The two keyboard maps live in
+[app/constants/key-mapping.ts](app/constants/key-mapping.ts) and are covered by
+tests asserting they are exact inverses of one another — a character converted
+to the other layout and back must come out unchanged. Add entries in pairs.

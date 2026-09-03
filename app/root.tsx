@@ -5,8 +5,8 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
-} from "@remix-run/react";
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+} from "react-router";
+import type { LinksFunction, LoaderFunctionArgs } from "react-router";
 import {
   PreventFlashOnWrongTheme,
   ThemeProvider,
@@ -47,30 +47,28 @@ export default function AppWithProviders() {
   );
 }
 
-export function App() {
+function App() {
   const data = useLoaderData<typeof loader>();
   const [theme] = useTheme();
 
   return (
-    <ThemeProvider specifiedTheme={data.theme} themeAction="/action/set-theme">
-      <html lang="th" className={cn(theme)}>
-        <head>
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <Meta />
-          <PreventFlashOnWrongTheme ssrTheme={Boolean(data.theme)} />
-          <Links />
-        </head>
-        <body>
-          <div className={"flex h-full flex-col"}>
-            <Navbar />
-            <Outlet />
-            <Footer />
-          </div>
-          <ScrollRestoration />
-          <Scripts />
-        </body>
-      </html>
-    </ThemeProvider>
+    <html lang="th" className={cn(theme)}>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <PreventFlashOnWrongTheme ssrTheme={Boolean(data.theme)} />
+        <Links />
+      </head>
+      <body>
+        <div className="flex h-full flex-col">
+          <Navbar />
+          <Outlet />
+          <Footer />
+        </div>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
   );
 }

@@ -16,7 +16,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `pnpm exec remix vite:dev --port ${PORT}`,
+    command: `pnpm exec react-router dev --port ${PORT}`,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     stdout: "ignore",

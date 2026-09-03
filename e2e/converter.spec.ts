@@ -110,29 +110,20 @@ test.describe("swap", () => {
     await expect(c.from).toHaveValue(HELLO_TH);
   });
 
-  // ---------------------------------------------------------------------
-  // Known bugs. `test.fail()` means "this is expected to fail" — the suite
-  // stays green while the bug is open, and turns RED the moment the bug is
-  // fixed, prompting us to drop the annotation. See app/routes/_index.tsx.
-  // ---------------------------------------------------------------------
+  test("output pane holds the reverse conversion after a swap", async ({
+    page,
+  }) => {
+    const c = converter(page);
 
-  test.fail(
-    "BUG: output pane should hold the reverse conversion after a swap",
-    async ({ page }) => {
-      const c = converter(page);
+    await c.from.fill(HELLO_EN_KEYS);
+    await expect(c.to).toHaveValue(HELLO_TH);
 
-      await c.from.fill(HELLO_EN_KEYS);
-      await expect(c.to).toHaveValue(HELLO_TH);
+    await c.swap.click();
 
-      await c.swap.click();
+    await expect(c.to).toHaveValue(HELLO_EN_KEYS);
+  });
 
-      // swapLangState() re-runs the *old* transformer over the *old* input,
-      // so both panes end up showing the Thai text.
-      await expect(c.to).toHaveValue(HELLO_EN_KEYS);
-    },
-  );
-
-  test.fail("BUG: typing after a swap should convert th -> en", async ({ page }) => {
+  test("typing after a swap converts th -> en", async ({ page }) => {
     const c = converter(page);
 
     await c.swap.click();
@@ -140,8 +131,6 @@ test.describe("swap", () => {
 
     await c.from.fill(HELLO_TH);
 
-    // The debounced transformer is memoised with an empty dep array, so it is
-    // permanently bound to the en->th mapping captured on first render.
     await expect(c.to).toHaveValue(HELLO_EN_KEYS);
   });
 });
