@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { EN_TH, TH_EN } from "~/constants/key-mapping";
+import { enToTh, thToEn } from "~/utils/key-mapper";
 import { cn } from "~/utils/misc";
 import { Textarea } from "~/components/ui/textarea";
 import debounce from "lodash/debounce";
@@ -29,18 +29,9 @@ type EditorState = {
   transformer: (text: string) => string;
 };
 
-function buildKeyMapper(mapping: Record<string, string>) {
-  return (text: string) => {
-    return text
-      .split("")
-      .map((char) => mapping[char] || char)
-      .join("");
-  };
-}
-
 const EDITOR_STATE_MAPPER: Record<string, EditorState> = {
-  en_th: { fromLang: "en", toLang: "th", transformer: buildKeyMapper(EN_TH) },
-  th_en: { fromLang: "th", toLang: "en", transformer: buildKeyMapper(TH_EN) },
+  en_th: { fromLang: "en", toLang: "th", transformer: enToTh },
+  th_en: { fromLang: "th", toLang: "en", transformer: thToEn },
 };
 
 function useEditorState() {
