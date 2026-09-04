@@ -6,6 +6,20 @@ keystrokes for what you meant to type in Thai — and get back `สวัสด�
 The conversion is a pure character-for-character remap of the Thai Kedmanee
 layout, runs entirely in the browser, and stores nothing.
 
+## Shortcuts
+
+The input is focused on load, so the usual flow is paste, `Cmd+Enter`, done.
+
+| Shortcut | Action |
+| --- | --- |
+| `Cmd/Ctrl + Enter` | Copy the result |
+| `Cmd/Ctrl + Shift + S` | Swap languages |
+| `Cmd/Ctrl + Shift + K` | Clear and refocus |
+| `/` | Focus the input |
+
+If the text you paste looks like the language you are converting *to*, the app
+says so and points at the swap shortcut rather than switching direction on you.
+
 ## Development
 
 ```sh
