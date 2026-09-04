@@ -2,4 +2,10 @@ node_modules
 
 /.cache
 /build
+/.react-router
 .env
+
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache

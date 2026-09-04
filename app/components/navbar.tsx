@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import { SwitchIcon } from "@radix-ui/react-icons";
 import { cn } from "~/utils/misc";
 import { ModeToggle } from "./mode-toggle";
@@ -17,13 +17,13 @@ function Navbar({ className }: { className?: string }) {
         <div className="flex flex-1 items-center gap-8">
           <Logo />
           {navigation.map((item) => (
-            <Link
+            <a
               key={item.name}
-              to={item.href}
+              href={item.href}
               className="text-sm/6 font-semibold"
             >
               {item.name}
-            </Link>
+            </a>
           ))}
         </div>
         <div>
