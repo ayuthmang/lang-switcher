@@ -39,6 +39,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # The Vercel preset only applies when VERCEL is set, so a plain build
+      # cannot catch breakage in it. This is what a deploy actually runs.
+      - name: Build (Vercel output)
+        run: VERCEL=1 pnpm build
+
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest
