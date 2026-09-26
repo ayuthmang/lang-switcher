@@ -57,6 +57,17 @@ Deploy the output of `pnpm build`:
 - `build/server`
 - `build/client`
 
+### Vercel
+
+`vercel.json` pins the framework to `react-router`. Without it Vercel can fall
+back to a stale "Remix" preset saved on the project and run the Remix builder,
+which fails with `Cannot find module '@remix-run/dev'`.
+
+On Vercel (where `VERCEL` is set) the build additionally applies
+`vercelPreset()`, which emits the Build Output API layout. That layout cannot
+be served by `@react-router/serve`, so the preset is skipped everywhere else
+and `pnpm start` keeps working. CI builds both shapes.
+
 ## Layout data
 
 The two keyboard maps live in
